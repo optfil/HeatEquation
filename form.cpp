@@ -29,6 +29,7 @@ Form::Form(QWidget *parent)
     sliderNX = new QSlider(Qt::Horizontal);
     sliderNX->setRange(1, 4);
     sliderNX->setSingleStep(1);
+    sliderNX->setPageStep(1);
     sliderNX->setTickInterval(1);
     sliderNX->setTickPosition(QSlider::TicksBelow);
     sliderNX->setValue(1);
@@ -61,7 +62,7 @@ Form::Form(QWidget *parent)
     labelStepT_2->setAlignment(Qt::AlignRight);
     labelStepT = new QLabel();
 
-    labelCFL_1 = new QLabel(tr("CFL number"));
+    labelCFL_1 = new QLabel(tr("Alpha"));
     labelCFL_2 = new QLabel(tr("α = "));
     labelCFL_2->setAlignment(Qt::AlignRight);
     labelCFL = new QLabel();

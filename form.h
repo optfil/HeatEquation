@@ -12,6 +12,13 @@
 #include <QtCharts/QtCharts>
 QT_CHARTS_USE_NAMESPACE
 
+constexpr double kRangeX = 10.0;
+constexpr double kRangeT = 1.0;
+constexpr int kNxMin = 32;
+constexpr int kNxMax = 256;
+constexpr int kNtMin = 1;
+constexpr int kNtMax = 1000;
+
 class Form : public QWidget
 {
     Q_OBJECT
