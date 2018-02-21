@@ -1,7 +1,24 @@
 #include "form.h"
 
+static double initial(double x, Form::InitialProfile profile)
+{
+    switch (profile)
+    {
+    case Form::Gauss:
+        return std::exp(-std::pow(x / (0.1*kRangeX), 2.0));
+    case Form::SuperGauss:
+        return std::exp(-std::pow(x / (0.1*kRangeX), 8.0));
+    case Form::Rectangle:
+        return (std::abs(x) < 0.1*kRangeX) ? 1.0 : 0.0;
+    case Form::Delta:
+        return (std::abs(x) < 1e-10*kRangeX) ? 1.0 : 0.0;
+    default:
+        return 0;
+    }
+}
+
 Form::Form(QWidget *parent)
-    : QWidget(parent), param(nullptr)
+    : QWidget(parent), param_(nullptr)
 {
     labelInitial = new QLabel(tr("Temperature profile"));
     comboBoxInitial = new QComboBox();
@@ -121,14 +138,17 @@ Form::Form(QWidget *parent)
     connect(sliderNT, SIGNAL(valueChanged(int)), this, SLOT(update_nt(int)));
     connect(spinBoxNX, SIGNAL(valueChanged(int)), this, SLOT(update_nx(int)));
     connect(spinBoxNT, SIGNAL(valueChanged(int)), this, SLOT(update_nt(int)));
+
+    initiateState();
+    updateSpectrum();
 }
 
 Form::~Form()
 {
-    delete param;
+    delete param_;
 }
 
-void Form::update_nx_from_slider(int log_n)
+void Form::update_nx_from_slider(int n)
 {
     int new_nx = static_cast<int>(std::round(std::pow(2.0, n+4)));
 
@@ -147,7 +167,7 @@ void Form::update_nx_from_slider(int log_n)
 
 void Form::update_nx(int n)
 {
-    int old_nx = param->get_nx();
+    int old_nx = param_->get_nx();
     if (n == 0)
     {
         n = std::max(old_nx/2, kNxMin);
@@ -159,7 +179,7 @@ void Form::update_nx(int n)
     spinBoxNX->blockSignals(true);
     sliderNX->blockSignals(true);
 
-    sliderNX->setValue(new_nx_log-3);
+    sliderNX->setValue(new_nx_log-4);
     spinBoxNX->setValue(new_nx);
     spinBoxNX->setSingleStep(new_nx);
 
@@ -192,13 +212,32 @@ void Form::selectionChanged()
 
 void Form::updateLabels()
 {
-    labelStepX->setText(QString::number(param->get_dx(), 'f', 3));
-    labelStepT->setText(QString::number(param->get_dt(), 'f', 3));
-    labelAlpha->setText(QString::number(param->get_alpha(), 'f', 3));
+    labelStepX->setText(QString::number(param_->get_dx(), 'f', 3));
+    labelStepT->setText(QString::number(param_->get_dt(), 'f', 3));
+    labelAlpha->setText(QString::number(param_->get_alpha(), 'f', 3));
 }
 
 void Form::initiateState()
-{}
+{
+    delete param_;
+    param_ = new Parameters(spinBoxNX->value()+1, spinBoxNT->value(), kRangeX, kRangeT);
+
+    InitialProfile profile = comboBoxInitial->currentData().value<InitialProfile>();
+    /*state_.resize(param->get_nx());
+    tmp_state_.resize(state_.size());
+    for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
+        state_[i] = initial(i * param->get_dx(), profile);
+
+    QList<QPointF> init_data;
+    for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
+        init_data.append(QPointF(i * param->get_dx(), state_[i]));
+    seriesInitial->clear();
+    seriesInitial->append(init_data);
+*/
+    updateLabels();
+  /*  updateDispersionDiffusion();
+    cleanSolution();*/
+}
 
 void Form::updateSpectrum()
 {}
