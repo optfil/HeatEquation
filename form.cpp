@@ -1,7 +1,7 @@
 #include "form.h"
 
 Form::Form(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), param(nullptr)
 {
     labelInitial = new QLabel(tr("Temperature profile"));
     comboBoxInitial = new QComboBox();
@@ -115,9 +115,90 @@ Form::Form(QWidget *parent)
     layoutMain->addWidget(tabWidgetMethods);
 
     setLayout(layoutMain);
+
+    connect(comboBoxInitial, SIGNAL(currentIndexChanged(int)), this, SLOT(selectionChanged()));
+    connect(sliderNX, SIGNAL(valueChanged(int)), this, SLOT(update_nx_from_slider(int)));
+    connect(sliderNT, SIGNAL(valueChanged(int)), this, SLOT(update_nt(int)));
+    connect(spinBoxNX, SIGNAL(valueChanged(int)), this, SLOT(update_nx(int)));
+    connect(spinBoxNT, SIGNAL(valueChanged(int)), this, SLOT(update_nt(int)));
 }
 
 Form::~Form()
 {
-
+    delete param;
 }
+
+void Form::update_nx_from_slider(int log_n)
+{
+    int new_nx = static_cast<int>(std::round(std::pow(2.0, n+4)));
+
+    spinBoxNX->blockSignals(true);
+    sliderNX->blockSignals(true);
+
+    spinBoxNX->setValue(new_nx);
+    spinBoxNX->setSingleStep(new_nx);
+
+    spinBoxNX->blockSignals(false);
+    sliderNX->blockSignals(false);
+
+    initiateState();
+    updateSpectrum();
+}
+
+void Form::update_nx(int n)
+{
+    int old_nx = param->get_nx();
+    if (n == 0)
+    {
+        n = std::max(old_nx/2, kNxMin);
+    }
+
+    int new_nx_log = static_cast<int>(std::round(std::log2(static_cast<double>(n))));
+    int new_nx = static_cast<int>(std::round(std::pow(2.0, new_nx_log)));
+
+    spinBoxNX->blockSignals(true);
+    sliderNX->blockSignals(true);
+
+    sliderNX->setValue(new_nx_log-3);
+    spinBoxNX->setValue(new_nx);
+    spinBoxNX->setSingleStep(new_nx);
+
+    spinBoxNX->blockSignals(false);
+    sliderNX->blockSignals(false);
+
+    initiateState();
+    updateSpectrum();
+}
+
+void Form::update_nt(int n)
+{
+    spinBoxNT->blockSignals(true);
+    sliderNT->blockSignals(true);
+
+    sliderNT->setValue(n);
+    spinBoxNT->setValue(n);
+
+    spinBoxNT->blockSignals(false);
+    sliderNT->blockSignals(false);
+
+    initiateState();
+}
+
+void Form::selectionChanged()
+{
+    initiateState();
+    updateSpectrum();
+}
+
+void Form::updateLabels()
+{
+    labelStepX->setText(QString::number(param->get_dx(), 'f', 3));
+    labelStepT->setText(QString::number(param->get_dt(), 'f', 3));
+    labelAlpha->setText(QString::number(param->get_alpha(), 'f', 3));
+}
+
+void Form::initiateState()
+{}
+
+void Form::updateSpectrum()
+{}

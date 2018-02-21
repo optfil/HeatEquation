@@ -12,6 +12,8 @@
 #include <QtCharts/QtCharts>
 QT_CHARTS_USE_NAMESPACE
 
+#include "parameters.h"
+
 constexpr double kRangeX = 10.0;
 constexpr double kRangeT = 1.0;
 constexpr int kNxMin = 32;
@@ -34,6 +36,13 @@ public:
     Q_ENUM(MethodType)
 
 private slots:
+    void update_nx_from_slider(int log_n);
+    void update_nx(int n);
+    void update_nt(int n);
+    void selectionChanged();
+    void updateLabels();
+    void updateSpectrum();
+    void initiateState();
 
 private:
     QLabel *labelInitial;
@@ -48,6 +57,10 @@ private:
     QPushButton *pushButtonSolve;
     QTabWidget *tabWidgetMethods;
     QWidget *widgetExplicit, *widgetImplicit, *widgetCrankNicolson;
+
+    Parameters *param_;
+    MethodType method_;
+
 };
 
 #endif // FORM_H
