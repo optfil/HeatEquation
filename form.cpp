@@ -62,10 +62,10 @@ Form::Form(QWidget *parent)
     labelStepT_2->setAlignment(Qt::AlignRight);
     labelStepT = new QLabel();
 
-    labelCFL_1 = new QLabel(tr("Alpha"));
-    labelCFL_2 = new QLabel(tr("α = "));
-    labelCFL_2->setAlignment(Qt::AlignRight);
-    labelCFL = new QLabel();
+    labelAlpha_1 = new QLabel(tr("Alpha"));
+    labelAlpha_2 = new QLabel(tr("α = "));
+    labelAlpha_2->setAlignment(Qt::AlignRight);
+    labelAlpha = new QLabel();
 
     pushButtonSolve = new QPushButton(tr("Start"));
 
@@ -77,6 +77,44 @@ Form::Form(QWidget *parent)
     tabWidgetMethods->addTab(widgetExplicit, tr("Explicit"));
     tabWidgetMethods->addTab(widgetImplicit, tr("Implicit"));
     tabWidgetMethods->addTab(widgetCrankNicolson, tr("Crank-Nicolson"));
+
+    QGridLayout *layoutNxNt = new QGridLayout();
+    layoutNxNt->addWidget(labelInitial, 0, 0, 1, 1);
+    layoutNxNt->addWidget(comboBoxInitial, 0, 1, 1, 3);
+    layoutNxNt->addWidget(labelSizeX_1, 1, 0, 1, 1);
+    layoutNxNt->addWidget(labelSizeX_2, 1, 1, 1, 1);
+    layoutNxNt->addWidget(labelSizeX, 1, 2, 1, 1);
+    layoutNxNt->addWidget(labelSizeT_1, 2, 0, 1, 1);
+    layoutNxNt->addWidget(labelSizeT_2, 2, 1, 1, 1);
+    layoutNxNt->addWidget(labelSizeT, 2, 2, 1, 1);
+    layoutNxNt->addWidget(labelNX_1, 3, 0, 1, 1, Qt::AlignBaseline);
+    layoutNxNt->addWidget(labelNX_2, 3, 1, 1, 1, Qt::AlignBaseline);
+    layoutNxNt->addWidget(spinBoxNX, 3, 2, 1, 1);
+    layoutNxNt->addWidget(sliderNX, 3, 3, 1, 1);
+    layoutNxNt->addWidget(labelNT_1, 4, 0, 1, 1, Qt::AlignBaseline);
+    layoutNxNt->addWidget(labelNT_2, 4, 1, 1, 1, Qt::AlignBaseline);
+    layoutNxNt->addWidget(spinBoxNT, 4, 2, 1, 1);
+    layoutNxNt->addWidget(sliderNT, 4, 3, 1, 1);
+    layoutNxNt->addWidget(labelStepX_1, 5, 0, 1, 1);
+    layoutNxNt->addWidget(labelStepX_2, 5, 1, 1, 1);
+    layoutNxNt->addWidget(labelStepX, 5, 2, 1, 1);
+    layoutNxNt->addWidget(labelStepT_1, 6, 0, 1, 1);
+    layoutNxNt->addWidget(labelStepT_2, 6, 1, 1, 1);
+    layoutNxNt->addWidget(labelStepT, 6, 2, 1, 1);
+    layoutNxNt->addWidget(labelAlpha_1, 7, 0, 1, 1);
+    layoutNxNt->addWidget(labelAlpha_2, 7, 1, 1, 1);
+    layoutNxNt->addWidget(labelAlpha, 7, 2, 1, 1);
+    layoutNxNt->addWidget(pushButtonSolve, 6, 3, 2, 1);
+
+    QVBoxLayout *layoutParam = new QVBoxLayout;
+    //layoutParam->addWidget(chartView);
+    layoutParam->addLayout(layoutNxNt);
+
+    QHBoxLayout *layoutMain = new QHBoxLayout();
+    layoutMain->addLayout(layoutParam);
+    layoutMain->addWidget(tabWidgetMethods);
+
+    setLayout(layoutMain);
 }
 
 Form::~Form()
