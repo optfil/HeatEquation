@@ -25,9 +25,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        form.cpp
+        form.cpp \
+    parameters.cpp
 
 HEADERS += \
-        form.h
+        form.h \
+    parameters.h
 
 TRANSLATIONS += HeatEquation_rus.ts
