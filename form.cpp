@@ -68,6 +68,15 @@ Form::Form(QWidget *parent)
     labelCFL = new QLabel();
 
     pushButtonSolve = new QPushButton(tr("Start"));
+
+    widgetExplicit = new QWidget();
+    widgetImplicit = new QWidget();
+    widgetCrankNicolson = new QWidget();
+
+    tabWidgetMethods = new QTabWidget();
+    tabWidgetMethods->addTab(widgetExplicit, tr("Explicit"));
+    tabWidgetMethods->addTab(widgetImplicit, tr("Implicit"));
+    tabWidgetMethods->addTab(widgetCrankNicolson, tr("Crank-Nicolson"));
 }
 
 Form::~Form()

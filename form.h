@@ -46,6 +46,8 @@ private:
     QLabel *labelStepT_1, *labelStepT_2, *labelStepT;
     QLabel *labelCFL_1, *labelCFL_2, *labelCFL;
     QPushButton *pushButtonSolve;
+    QTabWidget *tabWidgetMethods;
+    QWidget *widgetExplicit, *widgetImplicit, *widgetCrankNicolson;
 };
 
 #endif // FORM_H
