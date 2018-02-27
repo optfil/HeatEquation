@@ -45,6 +45,7 @@ private slots:
     void initiateState();
 
 private:
+    QChartView *chartView;
     QLabel *labelInitial;
     QComboBox *comboBoxInitial;
     QLabel *labelSizeX_1, *labelSizeX_2, *labelSizeT_1, *labelSizeT_2, *labelNX_1, *labelNX_2, *labelNT_1, *labelNT_2;
@@ -57,6 +58,7 @@ private:
     QPushButton *pushButtonSolve;
     QTabWidget *tabWidgetMethods;
     QWidget *widgetExplicit, *widgetImplicit, *widgetCrankNicolson;
+    QLineSeries *seriesInitial;
 
     Parameters *param_;
     MethodType method_;

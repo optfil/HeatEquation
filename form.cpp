@@ -17,9 +17,45 @@ static double initial(double x, Form::InitialProfile profile)
     }
 }
 
+static void setGrid(QValueAxis* ax)
+{
+    ax->setGridLineVisible(true);
+    QPen pen = ax->gridLinePen();
+    pen.setWidth(2);
+    pen.setColor(Qt::gray);
+    ax->setGridLinePen(pen);
+}
+
 Form::Form(QWidget *parent)
     : QWidget(parent), param_(nullptr)
 {
+    seriesInitial = new QLineSeries();
+    seriesInitial->setColor(Qt::blue);
+    seriesInitial->setPen(QPen(seriesInitial->pen().brush(), 3));
+
+    QChart *chartInitial = new QChart();
+    chartInitial->addSeries(seriesInitial);
+    chartInitial->setTitle(tr("Initial profile"));
+    chartInitial->legend()->hide();
+
+    QValueAxis *axisXInitial = new QValueAxis;
+    axisXInitial->setLineVisible(false);
+    setGrid(axisXInitial);
+    axisXInitial->setLabelsVisible(false);
+    axisXInitial->setRange(-kRangeX/2, kRangeX/2);
+    chartInitial->addAxis(axisXInitial, Qt::AlignBottom);
+    seriesInitial->attachAxis(axisXInitial);
+    QValueAxis *axisYInitial = new QValueAxis;
+    axisYInitial->setLineVisible(false);
+    setGrid(axisYInitial);
+    axisYInitial->setLabelsVisible(false);
+    axisYInitial->setRange(0.0, 1.003);
+    chartInitial->addAxis(axisYInitial, Qt::AlignLeft);
+    seriesInitial->attachAxis(axisYInitial);
+
+    chartView = new QChartView(chartInitial);
+    chartView->setRenderHint(QPainter::Antialiasing);
+
     labelInitial = new QLabel(tr("Temperature profile"));
     comboBoxInitial = new QComboBox();
     comboBoxInitial->addItem(tr("Gauss"), QVariant(Gauss));
@@ -124,7 +160,7 @@ Form::Form(QWidget *parent)
     layoutNxNt->addWidget(pushButtonSolve, 6, 3, 2, 1);
 
     QVBoxLayout *layoutParam = new QVBoxLayout;
-    //layoutParam->addWidget(chartView);
+    layoutParam->addWidget(chartView);
     layoutParam->addLayout(layoutNxNt);
 
     QHBoxLayout *layoutMain = new QHBoxLayout();
