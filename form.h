@@ -1,6 +1,8 @@
 #ifndef FORM_H
 #define FORM_H
 
+#include <vector>
+
 #include <QComboBox>
 #include <QPushButton>
 #include <QSlider>
@@ -63,6 +65,7 @@ private:
     Parameters *param_;
     MethodType method_;
 
+    std::vector<double> state_, tmp_state_;
 };
 
 #endif // FORM_H

@@ -259,17 +259,17 @@ void Form::initiateState()
     param_ = new Parameters(spinBoxNX->value()+1, spinBoxNT->value(), kRangeX, kRangeT);
 
     InitialProfile profile = comboBoxInitial->currentData().value<InitialProfile>();
-    /*state_.resize(param->get_nx());
+    state_.resize(param_->get_nx());
     tmp_state_.resize(state_.size());
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
-        state_[i] = initial(i * param->get_dx(), profile);
+        state_[i] = initial((double(i) - state_.size()/2) * param_->get_dx(), profile);
 
     QList<QPointF> init_data;
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
-        init_data.append(QPointF(i * param->get_dx(), state_[i]));
+        init_data.append(QPointF((double(i) - state_.size()/2) * param_->get_dx(), state_[i]));
     seriesInitial->clear();
     seriesInitial->append(init_data);
-*/
+
     updateLabels();
   /*  updateDispersionDiffusion();
     cleanSolution();*/
