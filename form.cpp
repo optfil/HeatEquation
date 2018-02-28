@@ -257,7 +257,7 @@ Form::Form(QWidget *parent)
     axisYExplicitDissipation->setTitleText("γ⋅Δt");
     axisYExplicitDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYExplicitDissipation->setTickCount(3);
-    axisYExplicitDissipation->setRange(0, 0.5);
+    axisYExplicitDissipation->setRange(0, 0.3);
     explicitDissipationChart->addAxis(axisYExplicitDissipation, Qt::AlignLeft);
     seriesExplicitIdealDissipation->attachAxis(axisYExplicitDissipation);
     seriesExplicitDissipation->attachAxis(axisYExplicitDissipation);
@@ -363,7 +363,7 @@ Form::Form(QWidget *parent)
     axisYImplicitDissipation->setTitleText("γ⋅Δt");
     axisYImplicitDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYImplicitDissipation->setTickCount(3);
-    axisYImplicitDissipation->setRange(0, 0.5);
+    axisYImplicitDissipation->setRange(0, 0.3);
     implicitDissipationChart->addAxis(axisYImplicitDissipation, Qt::AlignLeft);
     seriesImplicitIdealDissipation->attachAxis(axisYImplicitDissipation);
     seriesImplicitDissipation->attachAxis(axisYImplicitDissipation);
@@ -469,7 +469,7 @@ Form::Form(QWidget *parent)
     axisYCrankNicolsonDissipation->setTitleText("γ⋅Δt");
     axisYCrankNicolsonDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYCrankNicolsonDissipation->setTickCount(3);
-    axisYCrankNicolsonDissipation->setRange(0, 0.5);
+    axisYCrankNicolsonDissipation->setRange(0, 0.3);
     crankNicolsonDissipationChart->addAxis(axisYCrankNicolsonDissipation, Qt::AlignLeft);
     seriesCrankNicolsonIdealDissipation->attachAxis(axisYCrankNicolsonDissipation);
     seriesCrankNicolsonDissipation->attachAxis(axisYCrankNicolsonDissipation);
