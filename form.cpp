@@ -69,6 +69,10 @@ Form::Form(QWidget *parent)
     seriesCrankNicolsonDissipation->setColor(Qt::red);
     seriesCrankNicolsonDissipation->setPen(QPen(seriesCrankNicolsonDissipation->pen().brush(), 3));
 
+    seriesExplicitIdealDispersion->append(QList<QPointF>() << QPointF(0.0, 0.0) << QPointF(0.5, 0.0));
+    seriesImplicitIdealDispersion->append(QList<QPointF>() << QPointF(0.0, 0.0) << QPointF(0.5, 0.0));
+    seriesCrankNicolsonIdealDispersion->append(QList<QPointF>() << QPointF(0.0, 0.0) << QPointF(0.5, 0.0));
+
     QChart *chartInitial = new QChart();
     chartInitial->addSeries(seriesInitial);
     chartInitial->setTitle(tr("Initial profile"));
