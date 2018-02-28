@@ -254,7 +254,7 @@ Form::Form(QWidget *parent)
     QValueAxis *axisYExplicitDissipation = new QValueAxis;
     axisYExplicitDissipation->setLineVisible(false);
     setGrid(axisYExplicitDissipation);
-    axisYExplicitDissipation->setTitleText("γ⋅Δt");
+    axisYExplicitDissipation->setTitleText("γ⋅Δt / (4π²α)");
     axisYExplicitDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYExplicitDissipation->setTickCount(3);
     axisYExplicitDissipation->setRange(0, 0.3);
