@@ -45,6 +45,7 @@ private slots:
     void updateLabels();
     void updateSpectrum();
     void initiateState();
+    void updateDispersionDiffusion();
 
 private:
     QChartView *chartView;

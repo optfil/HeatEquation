@@ -1,5 +1,7 @@
 #include "form.h"
 
+#include <complex>
+
 static double initial(double x, Form::InitialProfile profile)
 {
     switch (profile)
@@ -15,6 +17,31 @@ static double initial(double x, Form::InitialProfile profile)
     default:
         return 0;
     }
+}
+
+static std::pair<double, double> dispersion_diffusion(double q_N, double alpha, Form::MethodType type)
+{
+    std::complex<double> lambda;
+    double kappa = 2.0*M_PI*q_N;
+    switch (type)
+    {
+    case Form::Explicit:
+        lambda = 1.0 - 2.0 * alpha * (1.0 - std::cos(kappa));
+        break;
+    case Form::Implicit:
+        lambda = 1.0 / (1.0 + 2.0 * alpha * (1.0 - std::cos(kappa)));
+        break;
+    case Form::CrankNicolson:
+        lambda = (1.0 - alpha * (1.0 - std::cos(kappa))) / (1.0 + alpha * (1.0 - std::cos(kappa)));
+        break;
+    default:
+        lambda = 1.0;
+        break;
+    }
+
+    lambda = std::log(lambda);
+
+    return std::make_pair(std::imag(lambda), -std::real(lambda));
 }
 
 static void setGrid(QValueAxis* ax)
@@ -230,7 +257,7 @@ Form::Form(QWidget *parent)
     axisYExplicitDissipation->setTitleText("γ⋅Δt");
     axisYExplicitDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYExplicitDissipation->setTickCount(3);
-    //axisYExplicitDissipation->setRange(-3.0, 3.0);
+    axisYExplicitDissipation->setRange(0, 0.5);
     explicitDissipationChart->addAxis(axisYExplicitDissipation, Qt::AlignLeft);
     seriesExplicitIdealDissipation->attachAxis(axisYExplicitDissipation);
     seriesExplicitDissipation->attachAxis(axisYExplicitDissipation);
@@ -336,7 +363,7 @@ Form::Form(QWidget *parent)
     axisYImplicitDissipation->setTitleText("γ⋅Δt");
     axisYImplicitDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYImplicitDissipation->setTickCount(3);
-    //axisYImplicitDissipation->setRange(-3.0, 3.0);
+    axisYImplicitDissipation->setRange(0, 0.5);
     implicitDissipationChart->addAxis(axisYImplicitDissipation, Qt::AlignLeft);
     seriesImplicitIdealDissipation->attachAxis(axisYImplicitDissipation);
     seriesImplicitDissipation->attachAxis(axisYImplicitDissipation);
@@ -442,7 +469,7 @@ Form::Form(QWidget *parent)
     axisYCrankNicolsonDissipation->setTitleText("γ⋅Δt");
     axisYCrankNicolsonDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYCrankNicolsonDissipation->setTickCount(3);
-    //axisYCrankNicolsonDissipation->setRange(-3.0, 3.0);
+    axisYCrankNicolsonDissipation->setRange(0, 0.5);
     crankNicolsonDissipationChart->addAxis(axisYCrankNicolsonDissipation, Qt::AlignLeft);
     seriesCrankNicolsonIdealDissipation->attachAxis(axisYCrankNicolsonDissipation);
     seriesCrankNicolsonDissipation->attachAxis(axisYCrankNicolsonDissipation);
@@ -528,6 +555,7 @@ Form::Form(QWidget *parent)
     connect(sliderNT, SIGNAL(valueChanged(int)), this, SLOT(update_nt(int)));
     connect(spinBoxNX, SIGNAL(valueChanged(int)), this, SLOT(update_nx(int)));
     connect(spinBoxNT, SIGNAL(valueChanged(int)), this, SLOT(update_nt(int)));
+    connect(tabWidgetMethods, SIGNAL(currentChanged(int)), this, SLOT(updateDispersionDiffusion()));
 
     initiateState();
     updateSpectrum();
@@ -625,8 +653,64 @@ void Form::initiateState()
     seriesInitial->append(init_data);
 
     updateLabels();
-  /*  updateDispersionDiffusion();
-    cleanSolution();*/
+    updateDispersionDiffusion();
+  /*  cleanSolution();*/
+}
+
+void Form::updateDispersionDiffusion()
+{
+    method_ = static_cast<MethodType>(tabWidgetMethods->currentIndex());
+
+    QList<QPointF> ideal_diff_data, explicit_disp_data, explicit_diff_data, implicit_disp_data, implicit_diff_data, crank_nicolson_disp_data, crank_nicolson_diff_data;
+    std::pair<double, double> coeffs;
+    for (int i = 0; i < param_->get_nx()/2+1; ++i)
+    {
+        double xi = static_cast<double>(i) / (param_->get_nx()-1);
+        ideal_diff_data.append(QPointF(xi, xi*xi));
+
+        coeffs = dispersion_diffusion(xi, param_->get_alpha(), Form::Explicit);
+        explicit_disp_data.append(QPointF(xi, coeffs.first));
+        explicit_diff_data.append(QPointF(xi, coeffs.second));
+
+        coeffs = dispersion_diffusion(xi, param_->get_alpha(), Form::Implicit);
+        implicit_disp_data.append(QPointF(xi, coeffs.first));
+        implicit_diff_data.append(QPointF(xi, coeffs.second));
+
+        coeffs = dispersion_diffusion(xi, param_->get_alpha(), Form::CrankNicolson);
+        crank_nicolson_disp_data.append(QPointF(xi, coeffs.first));
+        crank_nicolson_diff_data.append(QPointF(xi, coeffs.second));
+    }
+
+    for (int i = 0; i < param_->get_nx()/2+1; ++i)
+    {
+        explicit_disp_data[i].setY(explicit_disp_data[i].y() / M_PI);
+        explicit_diff_data[i].setY(explicit_diff_data[i].y() / (4.0*M_PI*M_PI*param_->get_alpha()));
+        implicit_disp_data[i].setY(implicit_disp_data[i].y() / M_PI);
+        implicit_diff_data[i].setY(implicit_diff_data[i].y() / (4.0*M_PI*M_PI*param_->get_alpha()));
+        crank_nicolson_disp_data[i].setY(crank_nicolson_disp_data[i].y() / M_PI);
+        crank_nicolson_diff_data[i].setY(crank_nicolson_diff_data[i].y() / (4.0*M_PI*M_PI*param_->get_alpha()));
+    }
+
+    seriesExplicitIdealDissipation->clear();
+    seriesExplicitIdealDissipation->append(ideal_diff_data);
+    seriesExplicitDispersion->clear();
+    seriesExplicitDispersion->append(explicit_disp_data);
+    seriesExplicitDissipation->clear();
+    seriesExplicitDissipation->append(explicit_diff_data);
+
+    seriesImplicitIdealDissipation->clear();
+    seriesImplicitIdealDissipation->append(ideal_diff_data);
+    seriesImplicitDispersion->clear();
+    seriesImplicitDispersion->append(implicit_disp_data);
+    seriesImplicitDissipation->clear();
+    seriesImplicitDissipation->append(implicit_diff_data);
+
+    seriesCrankNicolsonIdealDissipation->clear();
+    seriesCrankNicolsonIdealDissipation->append(ideal_diff_data);
+    seriesCrankNicolsonDispersion->clear();
+    seriesCrankNicolsonDispersion->append(crank_nicolson_disp_data);
+    seriesCrankNicolsonDissipation->clear();
+    seriesCrankNicolsonDissipation->append(crank_nicolson_diff_data);
 }
 
 void Form::updateSpectrum()
