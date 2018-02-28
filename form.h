@@ -60,7 +60,14 @@ private:
     QPushButton *pushButtonSolve;
     QTabWidget *tabWidgetMethods;
     QWidget *widgetExplicit, *widgetImplicit, *widgetCrankNicolson;
+    QChartView *explicitDispersion, *explicitDissipation, *explicitSolution;
+    QChartView *implicitDispersion, *implicitDissipation, *implicitSolution;
+    QChartView *crankNicolsonDispersion, *crankNicolsonDissipation, *crankNicolsonSolution;
     QLineSeries *seriesInitial;
+    QLineSeries *seriesExplicitIdealDispersion, *seriesImplicitIdealDispersion, *seriesCrankNicolsonIdealDispersion;
+    QLineSeries *seriesExplicitIdealDissipation, *seriesImplicitIdealDissipation, *seriesCrankNicolsonIdealDissipation;
+    QLineSeries *seriesExplicitDispersion, *seriesImplicitDispersion, *seriesCrankNicolsonDispersion;
+    QLineSeries *seriesExplicitDissipation, *seriesImplicitDissipation, *seriesCrankNicolsonDissipation;
 
     Parameters *param_;
     MethodType method_;
