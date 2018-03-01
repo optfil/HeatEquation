@@ -54,8 +54,11 @@ static void setGrid(QValueAxis* ax)
 }
 
 Form::Form(QWidget *parent)
-    : QWidget(parent), param_(nullptr)
+    : QWidget(parent), param_(nullptr), t_cur_(0.0)
 {
+    timer = new QTimer();
+    timer->setInterval(30);
+
     seriesInitial = new QLineSeries();
     seriesInitial->setColor(Qt::blue);
     seriesInitial->setPen(QPen(seriesInitial->pen().brush(), 3));
@@ -556,6 +559,8 @@ Form::Form(QWidget *parent)
     connect(spinBoxNX, SIGNAL(valueChanged(int)), this, SLOT(update_nx(int)));
     connect(spinBoxNT, SIGNAL(valueChanged(int)), this, SLOT(update_nt(int)));
     connect(tabWidgetMethods, SIGNAL(currentChanged(int)), this, SLOT(updateDispersionDiffusion()));
+    connect(pushButtonSolve, SIGNAL(clicked(bool)), this, SLOT(Solve()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(Tick()));
 
     initiateState();
     updateSpectrum();
@@ -654,7 +659,7 @@ void Form::initiateState()
 
     updateLabels();
     updateDispersionDiffusion();
-  /*  cleanSolution();*/
+    cleanSolution();
 }
 
 void Form::updateDispersionDiffusion()
@@ -715,3 +720,115 @@ void Form::updateDispersionDiffusion()
 
 void Form::updateSpectrum()
 {}
+
+void Form::cleanSolution()
+{
+    explicitSolution->chart()->removeAllSeries();
+    implicitSolution->chart()->removeAllSeries();
+    crankNicolsonSolution->chart()->removeAllSeries();
+}
+
+void Form::Solve()
+{
+    pushButtonSolve->setEnabled(false);
+    tabWidgetMethods->setEnabled(false);
+    comboBoxInitial->setEnabled(false);
+    spinBoxNX->setEnabled(false);
+    spinBoxNT->setEnabled(false);
+    sliderNX->setEnabled(false);
+    sliderNT->setEnabled(false);
+
+    initiateState();
+    updateSpectrum();
+
+    showState();
+
+    t_cur_ = 0.0;
+    timer->start();
+}
+
+void Form::Tick()
+{/*
+    static int t_index = 1;
+
+    if (t_cur_ < kRangeT + 1e-3*param->get_dt())
+    {
+        t_cur_ += param->get_dt();
+        tmp_state_.front() = state_.front();
+        tmp_state_.back() = state_.back();
+        switch (method_)
+        {
+        case 0:
+            for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
+                tmp_state_[i] = state_[i] - param->get_alpha() * (state_[i] - state_[i-1]);
+            break;
+        case 1:
+            for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
+                tmp_state_[i] = 0.5*(state_[i+1] + state_[i-1]) - 0.5*param->get_alpha() * (state_[i+1] - state_[i-1]);
+            break;
+        case 2:
+            for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
+                tmp_state_[i] = (1.0 - param->get_alpha()*param->get_alpha()) * state_[i] - 0.5*param->get_alpha() * (state_[i+1] - state_[i-1]) + 0.5*param->get_alpha()*param->get_alpha() * (state_[i+1] + state_[i-1]);
+            break;
+        }
+
+        state_ = tmp_state_;
+
+        if (t_cur_ > kRangeT / 5.0 * t_index)
+        {
+            ++t_index;
+            showState();
+        }
+
+        if (*std::max_element(state_.begin(), state_.end()) > 10.0 || *std::min_element(state_.begin(), state_.end()) < -10.0)
+            finishCalculation();
+    }
+    else
+    {
+        t_index = 1;
+
+        finishCalculation();
+    }*/
+}
+
+void Form::finishCalculation()
+{
+    timer->stop();
+    pushButtonSolve->setEnabled(true);
+    tabWidgetMethods->setEnabled(true);
+    comboBoxInitial->setEnabled(true);
+    spinBoxNX->setEnabled(true);
+    spinBoxNT->setEnabled(true);
+    sliderNX->setEnabled(true);
+    sliderNT->setEnabled(true);
+}
+
+void Form::showState()
+{/*
+    QChart *chart = nullptr;
+    switch(method_)
+    {
+    case Upwind:
+        chart = upwindSolution->chart();
+        break;
+    case Lax:
+        chart = laxSolution->chart();
+        break;
+    case LaxWendroff:
+        chart = laxWendroffSolution->chart();
+        break;
+    }
+
+    for (auto& series: chart->series())
+        series->setOpacity(0.5);
+
+    QLineSeries *series = new QLineSeries();
+    chart->addSeries(series);
+    series->attachAxis(chart->axisX());
+    series->attachAxis(chart->axisY());
+
+    QList<QPointF> data;
+    for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
+        data << QPointF(i*param->get_dx(), state_[i]);
+    series->append(data);*/
+}

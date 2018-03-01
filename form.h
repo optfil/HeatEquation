@@ -46,6 +46,8 @@ private slots:
     void updateSpectrum();
     void initiateState();
     void updateDispersionDiffusion();
+    void Solve();
+    void Tick();
 
 private:
     QChartView *chartView;
@@ -70,10 +72,16 @@ private:
     QLineSeries *seriesExplicitDispersion, *seriesImplicitDispersion, *seriesCrankNicolsonDispersion;
     QLineSeries *seriesExplicitDissipation, *seriesImplicitDissipation, *seriesCrankNicolsonDissipation;
 
+    QTimer *timer;
+
     Parameters *param_;
     MethodType method_;
-
     std::vector<double> state_, tmp_state_;
+    double t_cur_;
+
+    void showState();
+    void finishCalculation();
+    void cleanSolution();
 };
 
 #endif // FORM_H
