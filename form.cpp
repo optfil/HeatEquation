@@ -804,18 +804,18 @@ void Form::finishCalculation()
 }
 
 void Form::showState()
-{/*
+{
     QChart *chart = nullptr;
     switch(method_)
     {
-    case Upwind:
-        chart = upwindSolution->chart();
+    case Explicit:
+        chart = explicitSolution->chart();
         break;
-    case Lax:
-        chart = laxSolution->chart();
+    case Implicit:
+        chart = ImplicitSolution->chart();
         break;
-    case LaxWendroff:
-        chart = laxWendroffSolution->chart();
+    case CrankNicolson:
+        chart = crankNicolsonSolution->chart();
         break;
     }
 
@@ -829,6 +829,6 @@ void Form::showState()
 
     QList<QPointF> data;
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
-        data << QPointF(i*param->get_dx(), state_[i]);
-    series->append(data);*/
+        data << QPointF(((double)i - state_.size()/2) * param->get_dx(), state_[i]);
+    series->append(data);
 }
