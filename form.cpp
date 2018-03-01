@@ -2,18 +2,18 @@
 
 #include <complex>
 
-static double initial(double x, Form::InitialProfile profile)
+static double initial(double x, Form::InitialProfile profile, double ampl = 1.0)
 {
     switch (profile)
     {
     case Form::Gauss:
-        return std::exp(-std::pow(x / (0.1*kRangeX), 2.0));
+        return ampl * std::exp(-std::pow(x / (0.1*kRangeX), 2.0));
     case Form::SuperGauss:
-        return std::exp(-std::pow(x / (0.1*kRangeX), 8.0));
+        return ampl * std::exp(-std::pow(x / (0.1*kRangeX), 8.0));
     case Form::Rectangle:
-        return (std::abs(x) < 0.1*kRangeX) ? 1.0 : 0.0;
+        return ampl * ((std::abs(x) < 0.1*kRangeX) ? 1.0 : 0.0);
     case Form::Delta:
-        return (std::abs(x) < 1e-10*kRangeX) ? 1.0 : 0.0;
+        return ampl * ((std::abs(x) < 1e-10*kRangeX) ? 1.0 : 0.0);
     default:
         return 0;
     }
@@ -651,8 +651,10 @@ void Form::initiateState()
     tdma_u_.resize(state_.size()-1);
     tdma_v_.resize(state_.size()-1);
 
+    double ampl = (profile == Delta) ? kRangeX*0.1/param_->get_dx() : 1.0;
+
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
-        state_[i] = initial((double(i) - state_.size()/2) * param_->get_dx(), profile);
+        state_[i] = initial((double(i) - state_.size()/2) * param_->get_dx(), profile, ampl);
 
     QList<QPointF> init_data;
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
@@ -796,7 +798,7 @@ void Form::Tick()
             showState();
         }
 
-        if (*std::max_element(state_.begin(), state_.end()) > 3.0 || *std::min_element(state_.begin(), state_.end()) < -3.0)
+        if (*std::max_element(&state_[0], &state_[static_cast<int>(state_.size()*0.4)]) > 3.0 || *std::min_element(&state_[0], &state_[static_cast<int>(state_.size()*0.4)]) < -3.0)
         {
             t_index = 1;
             showState();
