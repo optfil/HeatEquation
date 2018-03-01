@@ -283,7 +283,7 @@ Form::Form(QWidget *parent)
     axisYExplicitSolution->setLineVisible(false);
     setGrid(axisYExplicitSolution);
     axisYExplicitSolution->setLabelsVisible(false);
-    //axisYExplicitSolution->setRange(-0.5, 1.5);
+    axisYExplicitSolution->setRange(-0.2, 1.2);
     explicitSolutionChart->addAxis(axisYExplicitSolution, Qt::AlignLeft);
 
     explicitSolution = new QChartView();
@@ -389,7 +389,7 @@ Form::Form(QWidget *parent)
     axisYImplicitSolution->setLineVisible(false);
     setGrid(axisYImplicitSolution);
     axisYImplicitSolution->setLabelsVisible(false);
-    //axisYImplicitSolution->setRange(-0.5, 1.5);
+    axisYImplicitSolution->setRange(-0.2, 1.2);
     implicitSolutionChart->addAxis(axisYImplicitSolution, Qt::AlignLeft);
 
     implicitSolution = new QChartView();
@@ -495,7 +495,7 @@ Form::Form(QWidget *parent)
     axisYCrankNicolsonSolution->setLineVisible(false);
     setGrid(axisYCrankNicolsonSolution);
     axisYCrankNicolsonSolution->setLabelsVisible(false);
-    //axisYCrankNicolsonSolution->setRange(-0.5, 1.5);
+    axisYCrankNicolsonSolution->setRange(-0.2, 1.2);
     crankNicolsonSolutionChart->addAxis(axisYCrankNicolsonSolution, Qt::AlignLeft);
 
     crankNicolsonSolution = new QChartView();
@@ -648,6 +648,9 @@ void Form::initiateState()
     InitialProfile profile = comboBoxInitial->currentData().value<InitialProfile>();
     state_.resize(param_->get_nx());
     tmp_state_.resize(state_.size());
+    tdma_u_.resize(state_.size()-1);
+    tdma_v_.resize(state_.size()-1);
+
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
         state_[i] = initial((double(i) - state_.size()/2) * param_->get_dx(), profile);
 
@@ -754,22 +757,35 @@ void Form::Tick()
     if (t_cur_ < kRangeT + 1e-3*param_->get_dt())
     {
         t_cur_ += param_->get_dt();
-        tmp_state_.front() = state_.front();
-        tmp_state_.back() = state_.back();
+
         switch (method_)
         {
         case Explicit:
+            tmp_state_.front() = state_.front();
+            tmp_state_.back() = state_.back();
             for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
                 tmp_state_[i] = state_[i] + param_->get_alpha() * (state_[i+1] - 2.0*state_[i] + state_[i-1]);
-            break;/*
-        case Implicit:
-            for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
-                tmp_state_[i] = 0.5*(state_[i+1] + state_[i-1]) - 0.5*param->get_alpha() * (state_[i+1] - state_[i-1]);
             break;
-        case CrankNicolson:
+        case Implicit:
+            tdma_u_[0] = 0.0;
+            tdma_v_[0] = state_[0];
+            double inv_denominator;
             for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
-                tmp_state_[i] = (1.0 - param->get_alpha()*param->get_alpha()) * state_[i] - 0.5*param->get_alpha() * (state_[i+1] - state_[i-1]) + 0.5*param->get_alpha()*param->get_alpha() * (state_[i+1] + state_[i-1]);
-            break;*/
+            {
+                inv_denominator = 1.0 / (param_->get_alpha() * tdma_u_[i-1] - (2.0*param_->get_alpha()+1));
+                tdma_u_[i] = -param_->get_alpha() * inv_denominator;
+                tdma_v_[i] = (-state_[i] - param_->get_alpha() * tdma_v_[i-1]) * inv_denominator;
+            }
+            tmp_state_[state_.size()-1] = state_[state_.size()-1];
+            for (decltype(state_.size()) i = state_.size()-2; i > 0; --i)
+                tmp_state_[i] = tdma_u_[i] * tmp_state_[i+1] + tdma_v_[i];
+            tmp_state_[0] = tdma_u_[0] * tmp_state_[1] + tdma_v_[0];
+
+            break;
+        case CrankNicolson:/*
+            for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
+                tmp_state_[i] = (1.0 - param->get_alpha()*param->get_alpha()) * state_[i] - 0.5*param->get_alpha() * (state_[i+1] - state_[i-1]) + 0.5*param->get_alpha()*param->get_alpha() * (state_[i+1] + state_[i-1]);*/
+            break;
         }
 
         state_ = tmp_state_;
@@ -780,7 +796,7 @@ void Form::Tick()
             showState();
         }
 
-        if (*std::max_element(state_.begin(), state_.end()) > 10.0 || *std::min_element(state_.begin(), state_.end()) < -10.0)
+        if (*std::max_element(state_.begin(), state_.end()) > 3.0 || *std::min_element(state_.begin(), state_.end()) < -3.0)
         {
             t_index = 1;
             showState();

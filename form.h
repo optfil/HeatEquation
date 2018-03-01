@@ -76,7 +76,7 @@ private:
 
     Parameters *param_;
     MethodType method_;
-    std::vector<double> state_, tmp_state_;
+    std::vector<double> state_, tmp_state_, tdma_u_, tdma_v_;
     double t_cur_;
 
     void showState();
