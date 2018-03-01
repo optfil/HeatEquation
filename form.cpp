@@ -57,7 +57,7 @@ Form::Form(QWidget *parent)
     : QWidget(parent), param_(nullptr), t_cur_(0.0)
 {
     timer = new QTimer();
-    timer->setInterval(30);
+    timer->setInterval(10);
 
     seriesInitial = new QLineSeries();
     seriesInitial->setColor(Qt::blue);
@@ -221,7 +221,7 @@ Form::Form(QWidget *parent)
     setGrid(axisYExplicitDispersion);
     axisYExplicitDispersion->setTitleText("Ω⋅Δt / π");
     axisYExplicitDispersion->setTitleFont(QFont("Times New Roman", 14));
-    axisYExplicitDispersion->setTickCount(3);
+    axisYExplicitDispersion->setTickCount(5);
     axisYExplicitDispersion->setRange(-0.5, 1.5);
     explicitDispersionChart->addAxis(axisYExplicitDispersion, Qt::AlignLeft);
     seriesExplicitIdealDispersion->attachAxis(axisYExplicitDispersion);
@@ -259,8 +259,8 @@ Form::Form(QWidget *parent)
     setGrid(axisYExplicitDissipation);
     axisYExplicitDissipation->setTitleText("γ⋅Δt / (4π²α)");
     axisYExplicitDissipation->setTitleFont(QFont("Times New Roman", 14));
-    axisYExplicitDissipation->setTickCount(3);
-    axisYExplicitDissipation->setRange(0, 0.3);
+    axisYExplicitDissipation->setTickCount(5);
+    axisYExplicitDissipation->setRange(-0.1, 0.3);
     explicitDissipationChart->addAxis(axisYExplicitDissipation, Qt::AlignLeft);
     seriesExplicitIdealDissipation->attachAxis(axisYExplicitDissipation);
     seriesExplicitDissipation->attachAxis(axisYExplicitDissipation);
@@ -327,7 +327,7 @@ Form::Form(QWidget *parent)
     setGrid(axisYImplicitDispersion);
     axisYImplicitDispersion->setTitleText("Ω⋅Δt / π");
     axisYImplicitDispersion->setTitleFont(QFont("Times New Roman", 14));
-    axisYImplicitDispersion->setTickCount(3);
+    axisYImplicitDispersion->setTickCount(5);
     axisYImplicitDispersion->setRange(-0.5, 1.5);
     implicitDispersionChart->addAxis(axisYImplicitDispersion, Qt::AlignLeft);
     seriesImplicitIdealDispersion->attachAxis(axisYImplicitDispersion);
@@ -365,8 +365,8 @@ Form::Form(QWidget *parent)
     setGrid(axisYImplicitDissipation);
     axisYImplicitDissipation->setTitleText("γ⋅Δt");
     axisYImplicitDissipation->setTitleFont(QFont("Times New Roman", 14));
-    axisYImplicitDissipation->setTickCount(3);
-    axisYImplicitDissipation->setRange(0, 0.3);
+    axisYImplicitDissipation->setTickCount(5);
+    axisYImplicitDissipation->setRange(-0.1, 0.3);
     implicitDissipationChart->addAxis(axisYImplicitDissipation, Qt::AlignLeft);
     seriesImplicitIdealDissipation->attachAxis(axisYImplicitDissipation);
     seriesImplicitDissipation->attachAxis(axisYImplicitDissipation);
@@ -433,7 +433,7 @@ Form::Form(QWidget *parent)
     setGrid(axisYCrankNicolsonDispersion);
     axisYCrankNicolsonDispersion->setTitleText("Ω⋅Δt / π");
     axisYCrankNicolsonDispersion->setTitleFont(QFont("Times New Roman", 14));
-    axisYCrankNicolsonDispersion->setTickCount(3);
+    axisYCrankNicolsonDispersion->setTickCount(5);
     axisYCrankNicolsonDispersion->setRange(-0.5, 1.5);
     crankNicolsonDispersionChart->addAxis(axisYCrankNicolsonDispersion, Qt::AlignLeft);
     seriesCrankNicolsonIdealDispersion->attachAxis(axisYCrankNicolsonDispersion);
@@ -471,8 +471,8 @@ Form::Form(QWidget *parent)
     setGrid(axisYCrankNicolsonDissipation);
     axisYCrankNicolsonDissipation->setTitleText("γ⋅Δt");
     axisYCrankNicolsonDissipation->setTitleFont(QFont("Times New Roman", 14));
-    axisYCrankNicolsonDissipation->setTickCount(3);
-    axisYCrankNicolsonDissipation->setRange(0, 0.3);
+    axisYCrankNicolsonDissipation->setTickCount(5);
+    axisYCrankNicolsonDissipation->setRange(-0.1, 0.3);
     crankNicolsonDissipationChart->addAxis(axisYCrankNicolsonDissipation, Qt::AlignLeft);
     seriesCrankNicolsonIdealDissipation->attachAxis(axisYCrankNicolsonDissipation);
     seriesCrankNicolsonDissipation->attachAxis(axisYCrankNicolsonDissipation);
@@ -748,28 +748,28 @@ void Form::Solve()
 }
 
 void Form::Tick()
-{/*
+{
     static int t_index = 1;
 
-    if (t_cur_ < kRangeT + 1e-3*param->get_dt())
+    if (t_cur_ < kRangeT + 1e-3*param_->get_dt())
     {
-        t_cur_ += param->get_dt();
+        t_cur_ += param_->get_dt();
         tmp_state_.front() = state_.front();
         tmp_state_.back() = state_.back();
         switch (method_)
         {
-        case 0:
+        case Explicit:
             for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
-                tmp_state_[i] = state_[i] - param->get_alpha() * (state_[i] - state_[i-1]);
-            break;
-        case 1:
+                tmp_state_[i] = state_[i] + param_->get_alpha() * (state_[i+1] - 2.0*state_[i] + state_[i-1]);
+            break;/*
+        case Implicit:
             for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
                 tmp_state_[i] = 0.5*(state_[i+1] + state_[i-1]) - 0.5*param->get_alpha() * (state_[i+1] - state_[i-1]);
             break;
-        case 2:
+        case CrankNicolson:
             for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
                 tmp_state_[i] = (1.0 - param->get_alpha()*param->get_alpha()) * state_[i] - 0.5*param->get_alpha() * (state_[i+1] - state_[i-1]) + 0.5*param->get_alpha()*param->get_alpha() * (state_[i+1] + state_[i-1]);
-            break;
+            break;*/
         }
 
         state_ = tmp_state_;
@@ -781,14 +781,18 @@ void Form::Tick()
         }
 
         if (*std::max_element(state_.begin(), state_.end()) > 10.0 || *std::min_element(state_.begin(), state_.end()) < -10.0)
+        {
+            t_index = 1;
+            showState();
             finishCalculation();
+        }
     }
     else
     {
         t_index = 1;
 
         finishCalculation();
-    }*/
+    }
 }
 
 void Form::finishCalculation()
@@ -812,7 +816,7 @@ void Form::showState()
         chart = explicitSolution->chart();
         break;
     case Implicit:
-        chart = ImplicitSolution->chart();
+        chart = implicitSolution->chart();
         break;
     case CrankNicolson:
         chart = crankNicolsonSolution->chart();
@@ -829,6 +833,6 @@ void Form::showState()
 
     QList<QPointF> data;
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
-        data << QPointF(((double)i - state_.size()/2) * param->get_dx(), state_[i]);
+        data << QPointF(((double)i - state_.size()/2) * param_->get_dx(), state_[i]);
     series->append(data);
 }
