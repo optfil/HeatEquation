@@ -363,7 +363,7 @@ Form::Form(QWidget *parent)
     QValueAxis *axisYImplicitDissipation = new QValueAxis;
     axisYImplicitDissipation->setLineVisible(false);
     setGrid(axisYImplicitDissipation);
-    axisYImplicitDissipation->setTitleText("γ⋅Δt");
+    axisYImplicitDissipation->setTitleText("γ⋅Δt / (4π²α)");
     axisYImplicitDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYImplicitDissipation->setTickCount(5);
     axisYImplicitDissipation->setRange(-0.1, 0.3);
@@ -469,7 +469,7 @@ Form::Form(QWidget *parent)
     QValueAxis *axisYCrankNicolsonDissipation = new QValueAxis;
     axisYCrankNicolsonDissipation->setLineVisible(false);
     setGrid(axisYCrankNicolsonDissipation);
-    axisYCrankNicolsonDissipation->setTitleText("γ⋅Δt");
+    axisYCrankNicolsonDissipation->setTitleText("γ⋅Δt / (4π²α)");
     axisYCrankNicolsonDissipation->setTitleFont(QFont("Times New Roman", 14));
     axisYCrankNicolsonDissipation->setTickCount(5);
     axisYCrankNicolsonDissipation->setRange(-0.1, 0.3);
