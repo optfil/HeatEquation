@@ -760,6 +760,7 @@ void Form::Tick()
     {
         t_cur_ += param_->get_dt();
 
+        double inv_denominator;
         switch (method_)
         {
         case Explicit:
@@ -771,7 +772,6 @@ void Form::Tick()
         case Implicit:
             tdma_u_[0] = 0.0;
             tdma_v_[0] = state_[0];
-            double inv_denominator;
             for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
             {
                 inv_denominator = 1.0 / (param_->get_alpha() * tdma_u_[i-1] - (2.0*param_->get_alpha()+1));
@@ -784,9 +784,20 @@ void Form::Tick()
             tmp_state_[0] = tdma_u_[0] * tmp_state_[1] + tdma_v_[0];
 
             break;
-        case CrankNicolson:/*
+        case CrankNicolson:
+            tdma_u_[0] = 0.0;
+            tdma_v_[0] = state_[0];
             for (decltype(state_.size()) i = 1; i < state_.size()-1; ++i)
-                tmp_state_[i] = (1.0 - param->get_alpha()*param->get_alpha()) * state_[i] - 0.5*param->get_alpha() * (state_[i+1] - state_[i-1]) + 0.5*param->get_alpha()*param->get_alpha() * (state_[i+1] + state_[i-1]);*/
+            {
+                inv_denominator = 1.0 / (0.5*param_->get_alpha() * tdma_u_[i-1] - (param_->get_alpha()+1));
+                tdma_u_[i] = -0.5*param_->get_alpha() * inv_denominator;
+                tdma_v_[i] = (-state_[i] - 0.5*param_->get_alpha()*(state_[i+1]-2.0*state_[i]+state_[i-1]) - 0.5*param_->get_alpha() * tdma_v_[i-1]) * inv_denominator;
+            }
+            tmp_state_[state_.size()-1] = state_[state_.size()-1];
+            for (decltype(state_.size()) i = state_.size()-2; i > 0; --i)
+                tmp_state_[i] = tdma_u_[i] * tmp_state_[i+1] + tdma_v_[i];
+            tmp_state_[0] = tdma_u_[0] * tmp_state_[1] + tdma_v_[0];
+
             break;
         }
 
