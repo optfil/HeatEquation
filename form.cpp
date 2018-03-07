@@ -290,12 +290,35 @@ Form::Form(QWidget *parent)
     explicitSolution->setRenderHint(QPainter::Antialiasing);
     explicitSolution->setChart(explicitSolutionChart);
 
+    QChart *explicitErrorChart = new QChart();
+    explicitErrorChart->setTitle(tr("Error"));
+    explicitErrorChart->legend()->hide();
+    QValueAxis *axisXExplicitError = new QValueAxis;
+    axisXExplicitError->setLineVisible(false);
+    setGrid(axisXExplicitError);
+    axisXExplicitError->setLabelsVisible(false);
+    axisXExplicitError->setRange(-0.5*kRangeX, 0.5*kRangeX);
+    explicitErrorChart->addAxis(axisXExplicitError, Qt::AlignBottom);
+    QValueAxis *axisYExplicitError = new QValueAxis;
+    axisYExplicitError->setLineVisible(false);
+    setGrid(axisYExplicitError);
+    axisYExplicitError->setLabelsVisible(false);
+    axisYExplicitError->setRange(-0.5, 0.5);
+    explicitErrorChart->addAxis(axisYExplicitError, Qt::AlignLeft);
+
+    explicitError = new QChartView();
+    explicitError->setRenderHint(QPainter::Antialiasing);
+    explicitError->setChart(explicitErrorChart);
+
     QVBoxLayout *explicitLeft = new QVBoxLayout();
     explicitLeft->addWidget(explicitDispersion);
     explicitLeft->addWidget(explicitDissipation);
+    QVBoxLayout *explicitRight = new QVBoxLayout();
+    explicitRight->addWidget(explicitSolution);
+    explicitRight->addWidget(explicitError);
     QHBoxLayout *explicitMain = new QHBoxLayout();
     explicitMain->addLayout(explicitLeft);
-    explicitMain->addWidget(explicitSolution);
+    explicitMain->addLayout(explicitRight);
     widgetExplicit->setLayout(explicitMain);
 
     widgetImplicit = new QWidget();
@@ -396,12 +419,35 @@ Form::Form(QWidget *parent)
     implicitSolution->setRenderHint(QPainter::Antialiasing);
     implicitSolution->setChart(implicitSolutionChart);
 
+    QChart *implicitErrorChart = new QChart();
+    implicitErrorChart->setTitle(tr("Error"));
+    implicitErrorChart->legend()->hide();
+    QValueAxis *axisXImplicitError = new QValueAxis;
+    axisXImplicitError->setLineVisible(false);
+    setGrid(axisXImplicitError);
+    axisXImplicitError->setLabelsVisible(false);
+    axisXImplicitError->setRange(-0.5*kRangeX, 0.5*kRangeX);
+    implicitErrorChart->addAxis(axisXImplicitError, Qt::AlignBottom);
+    QValueAxis *axisYImplicitError = new QValueAxis;
+    axisYImplicitError->setLineVisible(false);
+    setGrid(axisYImplicitError);
+    axisYImplicitError->setLabelsVisible(false);
+    axisYImplicitError->setRange(-0.5, 0.5);
+    implicitErrorChart->addAxis(axisYImplicitError, Qt::AlignLeft);
+
+    implicitError = new QChartView();
+    implicitError->setRenderHint(QPainter::Antialiasing);
+    implicitError->setChart(implicitErrorChart);
+
     QVBoxLayout *implicitLeft = new QVBoxLayout();
     implicitLeft->addWidget(implicitDispersion);
     implicitLeft->addWidget(implicitDissipation);
+    QVBoxLayout *implicitRight = new QVBoxLayout();
+    implicitRight->addWidget(implicitSolution);
+    implicitRight->addWidget(implicitError);
     QHBoxLayout *implicitMain = new QHBoxLayout();
     implicitMain->addLayout(implicitLeft);
-    implicitMain->addWidget(implicitSolution);
+    implicitMain->addLayout(implicitRight);
     widgetImplicit->setLayout(implicitMain);
 
     widgetCrankNicolson = new QWidget();
@@ -502,12 +548,35 @@ Form::Form(QWidget *parent)
     crankNicolsonSolution->setRenderHint(QPainter::Antialiasing);
     crankNicolsonSolution->setChart(crankNicolsonSolutionChart);
 
+    QChart *crankNicolsonErrorChart = new QChart();
+    crankNicolsonErrorChart->setTitle(tr("Error"));
+    crankNicolsonErrorChart->legend()->hide();
+    QValueAxis *axisXCrankNicolsonError = new QValueAxis;
+    axisXCrankNicolsonError->setLineVisible(false);
+    setGrid(axisXCrankNicolsonError);
+    axisXCrankNicolsonError->setLabelsVisible(false);
+    axisXCrankNicolsonError->setRange(-0.5*kRangeX, 0.5*kRangeX);
+    crankNicolsonErrorChart->addAxis(axisXCrankNicolsonError, Qt::AlignBottom);
+    QValueAxis *axisYCrankNicolsonError= new QValueAxis;
+    axisYCrankNicolsonError->setLineVisible(false);
+    setGrid(axisYCrankNicolsonError);
+    axisYCrankNicolsonError->setLabelsVisible(false);
+    axisYCrankNicolsonError->setRange(-0.5, 0.5);
+    crankNicolsonErrorChart->addAxis(axisYCrankNicolsonError, Qt::AlignLeft);
+
+    crankNicolsonError = new QChartView();
+    crankNicolsonError->setRenderHint(QPainter::Antialiasing);
+    crankNicolsonError->setChart(crankNicolsonErrorChart);
+
     QVBoxLayout *crankNicolsonLeft = new QVBoxLayout();
     crankNicolsonLeft->addWidget(crankNicolsonDispersion);
     crankNicolsonLeft->addWidget(crankNicolsonDissipation);
+    QVBoxLayout *crankNicolsonRight = new QVBoxLayout();
+    crankNicolsonRight->addWidget(crankNicolsonSolution);
+    crankNicolsonRight->addWidget(crankNicolsonError);
     QHBoxLayout *crankNicolsonMain = new QHBoxLayout();
     crankNicolsonMain->addLayout(crankNicolsonLeft);
-    crankNicolsonMain->addWidget(crankNicolsonSolution);
+    crankNicolsonMain->addLayout(crankNicolsonRight);
     widgetCrankNicolson->setLayout(crankNicolsonMain);
 
     tabWidgetMethods = new QTabWidget();
