@@ -74,8 +74,9 @@ private:
 
     QTimer *timer;
 
-    Parameters *param_;
     MethodType method_;
+    InitialProfile profile_;
+    Parameters *param_;
     std::vector<double> state_, tmp_state_, tdma_u_, tdma_v_;
     double t_cur_;
 

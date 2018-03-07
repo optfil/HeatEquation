@@ -59,35 +59,43 @@ static std::vector<double> exact(int n, double t, Form::InitialProfile profile, 
     {
         switch (profile)
         {
-        case Form::Gauss:
-            double r0 = 0.1 * kRangeX;
-            for (int i = 0; i < n; ++i)
+            case Form::Gauss:
             {
-                double xi = (double(i) - n/2) / n * kRangeX;
-                res[i] = r0 * std::sqrt(M_PI) / 4.0 / t / std::sqrt(r0*r0 + 4.0*t) * std::exp(-xi*xi / (r0*r0 + 4.0*t));
+                double r0 = 0.1 * kRangeX;
+                for (int i = 0; i < n; ++i)
+                {
+                    double xi = (double(i) - n/2) / n * kRangeX;
+                    res[i] = r0 * std::sqrt(M_PI) / 4.0 / t / std::sqrt(r0*r0 + 4.0*t) * std::exp(-xi*xi / (r0*r0 + 4.0*t));
+                }
+                break;
             }
-            break;
-        case Form::SuperGauss:
-            for (int i = 0; i < n; ++i)
+            case Form::SuperGauss:
             {
-                double xi = (double(i) - n/2) / n * kRangeX;
-                res[i] = 0.0;
+                for (int i = 0; i < n; ++i)
+                {
+                    double xi = (double(i) - n/2) / n * kRangeX;
+                    res[i] = 0.0;
+                }
+                break;
             }
-            break;
-        case Form::Rectangle:
-            for (int i = 0; i < n; ++i)
+            case Form::Rectangle:
             {
-                double xi = (double(i) - n/2) / n * kRangeX;
-                res[i] = std::sqrt(M_PI) / 8.0 / t * (std::erf((0.1*kRangeX - xi) / 2.0 / std::sqrt(t)) + std::erf((0.1*kRangeX + xi) / 2.0 / std::sqrt(t)));
+                for (int i = 0; i < n; ++i)
+                {
+                    double xi = (double(i) - n/2) / n * kRangeX;
+                    res[i] = std::sqrt(M_PI) / 8.0 / t * (std::erf((0.1*kRangeX - xi) / 2.0 / std::sqrt(t)) + std::erf((0.1*kRangeX + xi) / 2.0 / std::sqrt(t)));
+                }
+                break;
             }
-            break;
-        case Form::Delta:
-            for (int i = 0; i < n; ++i)
+            case Form::Delta:
             {
-                double xi = (double(i) - n/2) / n * kRangeX;
-                res[i] = 1.0 / 8.0 / std::pow(t, 1.5) * std::exp(-xi*xi / 4.0 / t);
+                for (int i = 0; i < n; ++i)
+                {
+                    double xi = (double(i) - n/2) / n * kRangeX;
+                    res[i] = 1.0 / 8.0 / std::pow(t, 1.5) * std::exp(-xi*xi / 4.0 / t);
+                }
+                break;
             }
-            break;
         }
     }
 
@@ -764,16 +772,16 @@ void Form::initiateState()
     delete param_;
     param_ = new Parameters(spinBoxNX->value()+1, spinBoxNT->value(), kRangeX, kRangeT);
 
-    InitialProfile profile = comboBoxInitial->currentData().value<InitialProfile>();
+    profile_ = comboBoxInitial->currentData().value<InitialProfile>();
     state_.resize(param_->get_nx());
     tmp_state_.resize(state_.size());
     tdma_u_.resize(state_.size()-1);
     tdma_v_.resize(state_.size()-1);
 
-    double ampl = (profile == Delta) ? kRangeX*0.1/param_->get_dx() : 1.0;
+    double ampl = (profile_ == Delta) ? kRangeX*0.1/param_->get_dx() : 1.0;
 
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
-        state_[i] = initial((double(i) - state_.size()/2) * param_->get_dx(), profile, ampl);
+        state_[i] = initial((double(i) - state_.size()/2) * param_->get_dx(), profile_, ampl);
 
     QList<QPointF> init_data;
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
@@ -850,6 +858,10 @@ void Form::cleanSolution()
     explicitSolution->chart()->removeAllSeries();
     implicitSolution->chart()->removeAllSeries();
     crankNicolsonSolution->chart()->removeAllSeries();
+
+    explicitError->chart()->removeAllSeries();
+    implicitError->chart()->removeAllSeries();
+    crankNicolsonError->chart()->removeAllSeries();
 }
 
 void Form::Solve()
@@ -957,30 +969,50 @@ void Form::finishCalculation()
 
 void Form::showState()
 {
-    QChart *chart = nullptr;
+    QChart *chartSolution = nullptr;
+    QChart *chartError = nullptr;
     switch(method_)
     {
     case Explicit:
-        chart = explicitSolution->chart();
+        chartSolution = explicitSolution->chart();
+        chartError = explicitError->chart();
         break;
     case Implicit:
-        chart = implicitSolution->chart();
+        chartSolution = implicitSolution->chart();
+        chartError = implicitError->chart();
         break;
     case CrankNicolson:
-        chart = crankNicolsonSolution->chart();
+        chartSolution = crankNicolsonSolution->chart();
+        chartError = crankNicolsonError->chart();
         break;
     }
 
-    for (auto& series: chart->series())
+    for (auto& series: chartSolution->series())
         series->setOpacity(0.5);
 
-    QLineSeries *series = new QLineSeries();
-    chart->addSeries(series);
-    series->attachAxis(chart->axisX());
-    series->attachAxis(chart->axisY());
+    QLineSeries *seriesSolution = new QLineSeries();
+    chartSolution->addSeries(seriesSolution);
+    seriesSolution->attachAxis(chartSolution->axisX());
+    seriesSolution->attachAxis(chartSolution->axisY());
 
-    QList<QPointF> data;
+    QList<QPointF> dataSolution;
+    dataSolution.reserve(state_.size());
     for (decltype(state_.size()) i = 0; i < state_.size(); ++i)
-        data << QPointF(((double)i - state_.size()/2) * param_->get_dx(), state_[i]);
-    series->append(data);
+        dataSolution << QPointF(((double)i - state_.size()/2) * param_->get_dx(), state_[i]);
+    seriesSolution->append(dataSolution);
+
+    for (auto& series: chartError->series())
+        series->setOpacity(0.5);
+
+    QLineSeries *seriesError= new QLineSeries();
+    chartError->addSeries(seriesError);
+    seriesError->attachAxis(chartError->axisX());
+    seriesError->attachAxis(chartError->axisY());
+
+    std::vector<double> data = exact(state_.size(), t_cur_, profile_, (profile_ == Delta) ? kRangeX*0.1/param_->get_dx() : 1.0);
+    QList<QPointF> dataError;
+    dataError.reserve(data.size());
+    for (decltype(data.size()) i = 0; i < data.size(); ++i)
+        dataError << QPointF(((double)i - state_.size()/2) * param_->get_dx(), data[i]);
+    seriesError->append(dataError);
 }
