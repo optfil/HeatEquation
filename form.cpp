@@ -44,6 +44,56 @@ static std::pair<double, double> dispersion_diffusion(double q_N, double alpha, 
     return std::make_pair(std::imag(lambda), -std::real(lambda));
 }
 
+static std::vector<double> exact(int n, double t, Form::InitialProfile profile, double ampl)
+{
+    std::vector<double> res(n);
+    if (t == 0)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            double xi = (double(i) - n/2) / n * kRangeX;
+            res[i] = initial(xi, profile, ampl);
+        }
+    }
+    else
+    {
+        switch (profile)
+        {
+        case Form::Gauss:
+            double r0 = 0.1 * kRangeX;
+            for (int i = 0; i < n; ++i)
+            {
+                double xi = (double(i) - n/2) / n * kRangeX;
+                res[i] = r0 * std::sqrt(M_PI) / 4.0 / t / std::sqrt(r0*r0 + 4.0*t) * std::exp(-xi*xi / (r0*r0 + 4.0*t));
+            }
+            break;
+        case Form::SuperGauss:
+            for (int i = 0; i < n; ++i)
+            {
+                double xi = (double(i) - n/2) / n * kRangeX;
+                res[i] = 0.0;
+            }
+            break;
+        case Form::Rectangle:
+            for (int i = 0; i < n; ++i)
+            {
+                double xi = (double(i) - n/2) / n * kRangeX;
+                res[i] = std::sqrt(M_PI) / 8.0 / t * (std::erf((0.1*kRangeX - xi) / 2.0 / std::sqrt(t)) + std::erf((0.1*kRangeX + xi) / 2.0 / std::sqrt(t)));
+            }
+            break;
+        case Form::Delta:
+            for (int i = 0; i < n; ++i)
+            {
+                double xi = (double(i) - n/2) / n * kRangeX;
+                res[i] = 1.0 / 8.0 / std::pow(t, 1.5) * std::exp(-xi*xi / 4.0 / t);
+            }
+            break;
+        }
+    }
+
+    return res;
+}
+
 static void setGrid(QValueAxis* ax)
 {
     ax->setGridLineVisible(true);
